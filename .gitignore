@@ -1,3 +1,6 @@
 CMakeFiles/
 cmake-build-debug/
 CMakeCache.txt
+.idea/.name
+.idea/vcs.xml
+.idea/workspace.xml

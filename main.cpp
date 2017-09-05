@@ -2,6 +2,7 @@
 #include <iostream>
 #include "Lib/tiny_obj_loader.h"
 #include "Eigen/Dense"
+#include "PoissonDisk.h"
 
 using namespace std;
 using Eigen::MatrixXd;
