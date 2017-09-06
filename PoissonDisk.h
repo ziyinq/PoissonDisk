@@ -9,19 +9,53 @@
 #define PI 3.141592653589
 
 struct Point {
-    Point(): x(0.f),y(0.f), valid(false)
-    {}
-    Point(float X, float Y): x(X), y(Y), valid(true)
-    {}
+    Point(): x(0.f),y(0.f), valid(false) {}
+    Point(float X, float Y): x(X), y(Y), valid(true) {}
 
     float x;
     float y;
     bool valid;
 };
 
-class PoissonDisk {
+struct gridPosition{
+    gridPosition(int X, int Y): x(X), y(Y) {}
 
+    int x;
+    int y;
 };
+
+gridPosition imageToGrid(Point p, float gridSize){
+    int gridX = (int) (p.x / gridSize);
+    int gridY = (int) (p.y / gridSize);
+    return gridPosition(gridX, gridY);
+}
+
+struct gridAttribute{
+    gridAttribute(int w, int h, float size): W(w), H(h), gridSize(size){
+        myGrid.resize(H);
+
+        for ( auto i = myGrid.begin() ; i != myGrid.end(); i++){
+            i->resize(W);
+        }
+    }
+
+    void insert(Point p, float size){
+        gridPosition gridP = imageToGrid(p , gridSize);
+
+        myGrid[gridP.x][gridP.y] = p;
+    }
+
+    int W;
+    int H;
+    float gridSize;
+    std::vector<std::vector<Point>> myGrid;
+};
+
+
+float getDistance(Point p1, Point p2){
+    float dis = sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
+    return dis;
+}
 
 Point generateRandomPointAround(Point thisPoint, float min_dist){
 
@@ -39,12 +73,29 @@ Point generateRandomPointAround(Point thisPoint, float min_dist){
     return Point(newX, newY);
 }
 
-bool inRectangle(Point thisPoint){
+bool inRectangle(Point thisPoint, float w, float h){
 
+    if (thisPoint.x > 0 && thisPoint.x < w && thisPoint.y > 0 && thisPoint.y <h){
+        return true;
+    }
+    return false;
 }
 
-bool inNeighbour(Point thisPoint){
+bool inNeighbour(Point thisPoint, gridAttribute thisGrid, float min_dist){
 
+    gridPosition G = imageToGrid(thisPoint, thisGrid.gridSize);
+
+    const int d = 2;
+
+    for (int i = G.x - d; i <= G.x + d; i++){
+        for (int j = G.y - d; j<= G.y + d; j++){
+            Point p = thisGrid.myGrid[i][j];
+            if (p.valid && getDistance(p, thisPoint) < min_dist){
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 std::vector<Point> generatePoissonDisk(float w, float h, float min_dist, int new_points_num){
@@ -54,7 +105,8 @@ std::vector<Point> generatePoissonDisk(float w, float h, float min_dist, int new
     int gridW = (int) ceil(w / gridSize);
     int gridH = (int) ceil(h / gridSize);
 
-    //TODO create grid here
+    // create grid here
+    gridAttribute poissonGrid(gridW, gridH, gridSize);
 
     std::vector<Point> processList;
     std::vector<Point> samplePoints;
@@ -71,16 +123,17 @@ std::vector<Point> generatePoissonDisk(float w, float h, float min_dist, int new
 
     //generate other points from points in queue
     while(!processList.empty()){
+        //TODO fix here for popRandom
         Point nextPoint;
         for (int i = 0; i < new_points_num; i++){
             Point newPoint = generateRandomPointAround(nextPoint, min_dist);
             // check that point is in the image region
             // and no points exists in the point's neighbourhood
-            if (inRectangle(newPoint) && inNeighbour(newPoint)){
+            if (inRectangle(newPoint, w, h) && inNeighbour(newPoint, poissonGrid, min_dist)){
                 //update containers
                 processList.push_back(newPoint);
                 samplePoints.push_back(newPoint);
-                //TODO add grid here
+                poissonGrid.insert(newPoint, gridSize);
             }
         }
     }
