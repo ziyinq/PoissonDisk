@@ -1,5 +1,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <iostream>
+#include <fstream>
+#include <vector>
 #include "Lib/tiny_obj_loader.h"
 #include "Eigen/Dense"
 #include "PoissonDisk.h"
@@ -25,10 +27,17 @@ int main(int argc, char *argv[]) {
 //        exit(1);
 //    }
 //    return 0;
-    MatrixXd m(2,2);
-    m(0,0) = 3;
-    m(1,0) = 2.5;
-    m(0,1) = -1;
-    m(1,1) = m(1,0) + m(0,1);
-    cout << m << endl;
+    std::vector<Point> poissonDisk = generatePoissonDisk(50, 50, 1, 30);
+
+    ofstream outfile;
+    outfile.open("points.txt");
+
+    int size = poissonDisk.size();
+    cout << size << endl;
+    for (int i = 0; i < size; i++){
+        outfile << poissonDisk[i].x << " " << poissonDisk[i].y << endl;
+    }
+    outfile.close();
+
+    return 0;
 }

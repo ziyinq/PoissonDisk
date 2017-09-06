@@ -57,22 +57,6 @@ float getDistance(Point p1, Point p2){
     return dis;
 }
 
-Point generateRandomPointAround(Point thisPoint, float min_dist){
-
-    srand(time(NULL));
-
-    float r1 = static_cast<float> (rand()) / static_cast<float> (RAND_MAX);
-    float r2 = static_cast<float> (rand()) / static_cast<float> (RAND_MAX);
-
-    float radius = (1 + r1) * min_dist;
-    float angle = 2 * PI * r2;
-
-    float newX = thisPoint.x + radius * cos(angle);
-    float newY = thisPoint.y * sin(angle);
-
-    return Point(newX, newY);
-}
-
 bool inRectangle(Point thisPoint, float w, float h){
 
     if (thisPoint.x > 0 && thisPoint.x < w && thisPoint.y > 0 && thisPoint.y <h){
@@ -89,13 +73,45 @@ bool inNeighbour(Point thisPoint, gridAttribute thisGrid, float min_dist){
 
     for (int i = G.x - d; i <= G.x + d; i++){
         for (int j = G.y - d; j<= G.y + d; j++){
-            Point p = thisGrid.myGrid[i][j];
-            if (p.valid && getDistance(p, thisPoint) < min_dist){
-                return true;
+            if ( i >= 0 && i < thisGrid.W && j >= 0 && j < thisGrid.W){
+                Point p = thisGrid.myGrid[i][j];
+                if (p.valid && getDistance(p, thisPoint) < min_dist){
+                    return false;
+                }
             }
         }
     }
-    return false;
+    return true;
+}
+
+Point generateRandomPointAround(Point thisPoint, float min_dist, float w, float h){
+
+    srand(time(NULL));
+    Point newpoint;
+    do {
+        float r1 = static_cast<float> (rand()) / static_cast<float> (RAND_MAX);
+        float r2 = static_cast<float> (rand()) / static_cast<float> (RAND_MAX);
+
+        float radius = (1 + r1) * min_dist;
+        float angle = 2 * PI * r2;
+
+        float newX = thisPoint.x + radius * cos(angle);
+        float newY = thisPoint.y + radius * sin(angle);
+        newpoint.x = newX;
+        newpoint.y = newY;
+    }while(!inRectangle(newpoint, w, h));
+    newpoint.valid = true;
+    return newpoint;
+}
+
+Point popRandom(std::vector<Point>& list){
+
+    srand(time(NULL));
+
+    int index = rand() % list.size();
+    Point p = list[index];
+    list.erase(list.begin() + index);
+    return p;
 }
 
 std::vector<Point> generatePoissonDisk(float w, float h, float min_dist, int new_points_num){
@@ -111,25 +127,27 @@ std::vector<Point> generatePoissonDisk(float w, float h, float min_dist, int new
     std::vector<Point> processList;
     std::vector<Point> samplePoints;
 
+
     //generate first point randomly
     srand(time(NULL));
-    float firstX = static_cast<float> (rand()) * static_cast<float>(gridW) ;
-    float firstY = static_cast<float> (rand()) * static_cast<float>(gridH) ;
+    float firstX = static_cast<float> (rand()) / static_cast<float>(RAND_MAX) * w ;
+    float firstY = static_cast<float> (rand()) / static_cast<float>(RAND_MAX) * h ;
     Point firstPoint = Point(firstX, firstY);
 
     //update containers
     processList.push_back(firstPoint);
     samplePoints.push_back(firstPoint);
+    poissonGrid.insert(firstPoint, gridSize);
 
     //generate other points from points in queue
     while(!processList.empty()){
-        //TODO fix here for popRandom
-        Point nextPoint;
+        // fetch a new point from processList
+        Point nextPoint = popRandom(processList);
         for (int i = 0; i < new_points_num; i++){
-            Point newPoint = generateRandomPointAround(nextPoint, min_dist);
+            Point newPoint = generateRandomPointAround(nextPoint, min_dist, w ,h);
             // check that point is in the image region
             // and no points exists in the point's neighbourhood
-            if (inRectangle(newPoint, w, h) && inNeighbour(newPoint, poissonGrid, min_dist)){
+            if (inNeighbour(newPoint, poissonGrid, min_dist)){
                 //update containers
                 processList.push_back(newPoint);
                 samplePoints.push_back(newPoint);
@@ -139,7 +157,5 @@ std::vector<Point> generatePoissonDisk(float w, float h, float min_dist, int new
     }
     return samplePoints;
 }
-
-
 
 #endif //POISSONDISK_POISSONDISK_H
