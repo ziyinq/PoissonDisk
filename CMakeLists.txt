@@ -3,5 +3,5 @@ project(poissonDisk)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES main.cpp PoissonDisk.h)
+set(SOURCE_FILES main.cpp PoissonDisk.h LoadObj.h)
 add_executable(poissonDisk ${SOURCE_FILES})

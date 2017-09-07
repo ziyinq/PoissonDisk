@@ -1,8 +1,6 @@
-#define TINYOBJLOADER_IMPLEMENTATION
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "Lib/tiny_obj_loader.h"
 #include "Eigen/Dense"
 #include "PoissonDisk.h"
 
@@ -11,23 +9,14 @@ using Eigen::MatrixXd;
 
 int main(int argc, char *argv[]) {
 
-//    std::string inputfile = argv[1];
-//    tinyobj::attrib_t attrib;
-//    std::vector<tinyobj::shape_t> shapes;
-//    std::vector<tinyobj::material_t> materials;
-//
-//    std::string err;
-//    bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, inputfile.c_str());
-//
-//    if (!err.empty()) { // `err` may contain warning message.
-//        std::cerr << err << std::endl;
-//    }
-//
-//    if (!ret) {
-//        exit(1);
-//    }
-//    return 0;
-    std::vector<Point> poissonDisk = generatePoissonDisk(50, 50, 1, 30);
+    if (argv[1] == NULL){
+        std::cerr << "No file name!" << std::endl;
+        exit(1);
+    }
+    std::string file = "cube.obj";
+    boundBox bBox = LoadObject(file);
+
+    std::vector<Point> poissonDisk = generatePoissonDisk(bBox, 1, 30);
 
     ofstream outfile;
     outfile.open("points.txt");
