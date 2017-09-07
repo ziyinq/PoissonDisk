@@ -72,13 +72,13 @@ bool inNeighbour(Point thisPoint, gridAttribute thisGrid, float min_dist, boundB
 
     gridPosition G = imageToGrid(thisPoint, thisGrid.gridSize, bBox);
 
-    const int d = 2;
+    const int d = 5;
 
     for (int i = G.x - d; i <= G.x + d; i++){
         for (int j = G.y - d; j<= G.y + d; j++){
-            if ( i >= 0 && i < thisGrid.W && j >= 0 && j < thisGrid.W){
+            if ( i >= 0 && i < thisGrid.W && j >= 0 && j < thisGrid.H){
                 Point p = thisGrid.myGrid[i][j];
-                if (p.valid && getDistance(p, thisPoint) < min_dist){
+                if (p.valid && (getDistance(p, thisPoint) < min_dist)){
                     return false;
                 }
             }
@@ -141,9 +141,10 @@ std::vector<Point> generatePoissonDisk(boundBox bBox, float min_dist, int new_po
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
-    float r = dist(mt);
-    float firstX = bBox.xmin + r * (bBox.xmax - bBox.xmin);
-    float firstY = bBox.ymin + r * (bBox.ymax - bBox.ymin);
+    float r1 = dist(mt);
+    float r2 = dist(mt);
+    float firstX = bBox.xmin + r1 * (bBox.xmax - bBox.xmin);
+    float firstY = bBox.ymin + r2 * (bBox.ymax - bBox.ymin);
     Point firstPoint = Point(firstX, firstY);
 
     //update containers

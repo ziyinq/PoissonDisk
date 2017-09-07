@@ -32,6 +32,19 @@ boundBox LoadObject(std::string input){
     if (!ret) {
         exit(1);
     }
-    return boundBox(-50, 0, 0, 50);
+
+    std::vector<float> objX;
+    std::vector<float> objY;
+    int size = (attrib.vertices.size() / 3);
+    for (int i = 0; i < size; i++){
+        objX.push_back(attrib.vertices[i*3]);
+        objY.push_back(attrib.vertices[i*3+1]);
+    }
+    auto maxX = std::max_element(objX.begin(), objX.end());
+    auto minX = std::min_element(objX.begin(), objX.end());
+    auto maxY = std::max_element(objY.begin(), objY.end());
+    auto minY = std::min_element(objY.begin(), objY.end());
+
+    return boundBox(*minX, *maxX, *minY, *maxY);
 }
 #endif //POISSONDISK_LOADOBJ_H
