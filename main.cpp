@@ -13,10 +13,10 @@ int main(int argc, char *argv[]) {
 //        std::cerr << "No file name!" << std::endl;
 //        exit(1);
 //    }
-    std::string file = "cube.obj";
-    boundBox bBox = LoadObject(file);
-
-    std::vector<Point> poissonDisk = generatePoissonDisk(bBox, 1, 10);
+    //std::string file = "cube.obj";
+    //boundBox bBox = LoadObject(file);
+    boundBox bBox(0, 50, 0, 50);
+    std::vector<Point> poissonDisk = generatePoissonDisk(bBox, 1, 30);
 
     ofstream outfile;
     outfile.open("points.txt");

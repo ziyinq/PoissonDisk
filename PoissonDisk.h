@@ -27,8 +27,8 @@ struct gridPosition{
 };
 
 gridPosition imageToGrid(Point p, float gridSize, boundBox bBox){
-    int gridX = (int) (p.x - bBox.xmin / gridSize);
-    int gridY = (int) (p.y - bBox.ymin / gridSize);
+    int gridX = (int) ((p.x - bBox.xmin) / gridSize);
+    int gridY = (int) ((p.y - bBox.ymin) / gridSize);
     return gridPosition(gridX, gridY);
 }
 
@@ -41,7 +41,7 @@ struct gridAttribute{
         }
     }
 
-    void insert(Point p, float size){
+    void insert(Point p){
         gridPosition gridP = imageToGrid(p , gridSize, bBox);
 
         myGrid[gridP.x][gridP.y] = p;
@@ -79,12 +79,12 @@ bool inNeighbour(Point thisPoint, gridAttribute thisGrid, float min_dist, boundB
             if ( i >= 0 && i < thisGrid.W && j >= 0 && j < thisGrid.H){
                 Point p = thisGrid.myGrid[i][j];
                 if (p.valid && (getDistance(p, thisPoint) < min_dist)){
-                    return false;
+                    return true;
                 }
             }
         }
     }
-    return true;
+    return false;
 }
 
 Point generateRandomPointAround(Point thisPoint, float min_dist, boundBox bBox){
@@ -105,8 +105,8 @@ Point generateRandomPointAround(Point thisPoint, float min_dist, boundBox bBox){
         float newY = thisPoint.y + radius * sin(angle);
         newpoint.x = newX;
         newpoint.y = newY;
+        newpoint.valid = true;
     }while(!inRectangle(newpoint, bBox));
-    newpoint.valid = true;
     return newpoint;
 }
 
@@ -150,7 +150,7 @@ std::vector<Point> generatePoissonDisk(boundBox bBox, float min_dist, int new_po
     //update containers
     processList.push_back(firstPoint);
     samplePoints.push_back(firstPoint);
-    poissonGrid.insert(firstPoint, gridSize);
+    poissonGrid.insert(firstPoint);
 
     //generate other points from points in queue
     while(!processList.empty()){
@@ -160,11 +160,11 @@ std::vector<Point> generatePoissonDisk(boundBox bBox, float min_dist, int new_po
             Point newPoint = generateRandomPointAround(nextPoint, min_dist, bBox);
             // check that point is in the image region
             // and no points exists in the point's neighbourhood
-            if (inNeighbour(newPoint, poissonGrid, min_dist, bBox)){
+            if (!inNeighbour(newPoint, poissonGrid, min_dist, bBox)){
                 //update containers
                 processList.push_back(newPoint);
                 samplePoints.push_back(newPoint);
-                poissonGrid.insert(newPoint, gridSize);
+                poissonGrid.insert(newPoint);
             }
         }
     }
