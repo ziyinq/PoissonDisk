@@ -15,8 +15,14 @@ int main(int argc, char *argv[]) {
 //    }
     //std::string file = "cube.obj";
     //boundBox bBox = LoadObject(file);
-    boundBox bBox(0, 50, 0, 50);
+    boundBox bBox(0, 10, 0, 10);
+    std::clock_t start;
+    double duration1;
+    std::vector<double> duration;
+    start = std::clock();
     std::vector<Point> poissonDisk = generatePoissonDisk(bBox, 1, 30);
+    duration1 = (std::clock() - start) / (double) CLOCKS_PER_SEC;
+    std::cout << "duration = " << duration1 << std::endl;
 
     ofstream outfile;
     outfile.open("points.txt");
