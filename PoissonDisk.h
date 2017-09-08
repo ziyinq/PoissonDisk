@@ -60,7 +60,7 @@ float getDistance(Point p1, Point p2){
     return dis;
 }
 
-bool inRectangle(Point thisPoint, boundBox bBox){
+bool inRectangle(Point thisPoint, const boundBox& bBox){
 
     if (thisPoint.x > bBox.xmin && thisPoint.x < bBox.xmax && thisPoint.y > bBox.ymin && thisPoint.y < bBox.ymax){
         return true;
@@ -68,7 +68,7 @@ bool inRectangle(Point thisPoint, boundBox bBox){
     return false;
 }
 
-bool inNeighbour(Point thisPoint, gridAttribute thisGrid, float min_dist, boundBox bBox){
+bool inNeighbour(const Point& thisPoint, const gridAttribute& thisGrid, float min_dist, const boundBox& bBox){
 
     gridPosition G = imageToGrid(thisPoint, thisGrid.gridSize, bBox);
 
@@ -87,7 +87,7 @@ bool inNeighbour(Point thisPoint, gridAttribute thisGrid, float min_dist, boundB
     return false;
 }
 
-Point generateRandomPointAround(Point thisPoint, float min_dist, boundBox bBox, std::mt19937& mt, std::uniform_real_distribution<float>& dist){
+Point generateRandomPointAround(Point thisPoint, float min_dist, const boundBox& bBox, std::mt19937& mt, std::uniform_real_distribution<float>& dist){
     Point newpoint;
     do {
         float r1 = dist(mt);
@@ -105,23 +105,18 @@ Point generateRandomPointAround(Point thisPoint, float min_dist, boundBox bBox, 
     return newpoint;
 }
 
-Point popRandom(std::vector<Point>& list, std::mt19937& mt){
+Point popRandom(std::vector<Point>& list, std::mt19937& mt, int& index){
 
     int size = list.size();
     std::uniform_real_distribution<> dist(0, size);
 
-    int index = dist(mt);
+    index = dist(mt);
     Point p = list[index];
-    list.erase(list.begin() + index);
     return p;
 }
 
 std::vector<Point> generatePoissonDisk(boundBox bBox, float min_dist, int new_points_num){
     //create grid
-    //std::clock_t start;
-    //double duration1, duration2;
-    //std::vector<double> duration;
-    //start = std::clock();
     float gridSize = min_dist / sqrt(2);
 
     int gridW = (int) ceil((bBox.xmax - bBox.xmin) / gridSize);
@@ -149,12 +144,14 @@ std::vector<Point> generatePoissonDisk(boundBox bBox, float min_dist, int new_po
     samplePoints.push_back(firstPoint);
     poissonGrid.insert(firstPoint);
 
-    //duration1 = (std::clock() - start) / (double) CLOCKS_PER_SEC;
-    int k = 0;
+    int random_index = 0;
+
     //generate other points from points in queue
     while(!processList.empty()){
         // fetch a new point from processList
-        Point nextPoint = popRandom(processList, mt);
+        Point nextPoint = popRandom(processList, mt, random_index);
+        // if nice point found, stop, if not, erase from processList
+        bool found_point=false;
         for (int i = 0; i < new_points_num; i++){
             Point newPoint = generateRandomPointAround(nextPoint, min_dist, bBox, mt, dist);
             // check that point is in the image region
@@ -164,17 +161,14 @@ std::vector<Point> generatePoissonDisk(boundBox bBox, float min_dist, int new_po
                 processList.push_back(newPoint);
                 samplePoints.push_back(newPoint);
                 poissonGrid.insert(newPoint);
+                found_point = true;
+                break;
             }
         }
-        //duration.push_back((std::clock() - start) / (double) CLOCKS_PER_SEC);
-        k = k + 1;
+        if(!found_point) {
+            processList.erase(processList.begin()+random_index);
+        }
     }
-    //duration2 = (std::clock() - start) / (double) CLOCKS_PER_SEC;
-
-    std::cout << "Iteration number is " << k << std::endl;
-    //std::cout << "TIME COST FOR DURATION1 : " << duration1 << std::endl;
-    //std::cout << "TIME COST FOR first iter : " << duration[0] << std::endl;
-    //std::cout << "TIME COST FOR DURATION2 : " << duration2 << std::endl;
     return samplePoints;
 }
 
