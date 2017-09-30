@@ -9,11 +9,13 @@
 #ifndef POISSONDISK_LOADOBJ_H
 #define POISSONDISK_LOADOBJ_H
 struct boundBox{
-    boundBox(float XMIN, float XMAX, float YMIN, float YMAX): xmin(XMIN), xmax(XMAX), ymin(YMIN), ymax(YMAX) {}
+    boundBox(float XMIN, float XMAX, float YMIN, float YMAX, float ZMIN, float ZMAX): xmin(XMIN), xmax(XMAX), ymin(YMIN), ymax(YMAX), zmin(ZMIN), zmax(ZMAX) {}
     float xmin;
     float xmax;
     float ymin;
     float ymax;
+    float zmin;
+    float zmax;
 };
 boundBox LoadObject(std::string input){
 
@@ -44,7 +46,9 @@ boundBox LoadObject(std::string input){
     auto minX = std::min_element(objX.begin(), objX.end());
     auto maxY = std::max_element(objY.begin(), objY.end());
     auto minY = std::min_element(objY.begin(), objY.end());
+    auto maxZ = std::max_element(objX.begin(), objX.end());
+    auto minZ = std::min_element(objX.begin(), objX.end());
 
-    return boundBox(*minX, *maxX, *minY, *maxY);
+    return boundBox(*minX, *maxX, *minY, *maxY, *minZ, *maxZ);
 }
 #endif //POISSONDISK_LOADOBJ_H

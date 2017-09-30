@@ -2,7 +2,8 @@
 #include <fstream>
 #include <vector>
 #include "Eigen/Dense"
-#include "PoissonDisk.h"
+//#include "PoissonDisk2D.h"
+#include "PoissonDisk3D.h"
 
 
 using namespace std;
@@ -16,16 +17,16 @@ int main(int argc, char *argv[]) {
 //    }
     //std::string file = "cube.obj";
     //boundBox bBox = LoadObject(file);
-    boundBox bBox(0, 50, 0, 50);
-    std::vector<Point> poissonDisk = generatePoissonDisk(bBox, 1, 30);
+    boundBox bBox(0, 50, 0, 50, 0, 50);
+    std::vector<Point> poissonDisk = generatePoissonDisk3D(bBox, 1, 30);
 
     ofstream outfile;
-    outfile.open("points.txt");
+    outfile.open("points.obj");
 
     int size = poissonDisk.size();
     cout << size << endl;
     for (int i = 0; i < size; i++){
-        outfile << poissonDisk[i].x << " " << poissonDisk[i].y << endl;
+        outfile << "v" << " " << poissonDisk[i].x << " " << poissonDisk[i].y << " " << poissonDisk[i].z << endl;
     }
     outfile.close();
 
